@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        border: 0;
+      }
+      body {
+        height: 100vh;
+        width: 100vw;
+      }
+      #usernameDiv {
+        width: 25%;
+        text-align: center;
+        margin: auto;
+        margin-top: 25%;
+      }
+      #side-panel {
+        float: left;
+        width: 25%;
+        background-color: tomato;
+        margin: 0;
+      }
+      #chat-panel {
+        float: left;
+        position: relative;
+        text-align: center;
+        width: 65%;
+        height: 100%;
+      }
+      #chat-box {
+        display: none;
+        width: 100%;
+        height: 100%;
+      }
+      #output {
+        height: 600px;
+      }
+      #send-message {
+        position: absolute;
+        bottom: 0;
+        width: 180px;
+        left: 0;
+        right: 0;
+        margin: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="usernameDiv">
+      <input type="textbox" placeholder="Enter a username" /><br /><br />
+      <button id="submit">Submit</button>
+    </div>
+    <div id="chat-box">
+      <div id="side-panel">
+        <h3>Active Users</h3>
+      </div>
+      <div id="chat-panel">
+        <div id="output"></div>
+        <div id="send-message">
+          <input type="text" name="message" id="message" /><br /><br />
+          <button type="submit" id="msg-btn">Send Message</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      //reference to dom elements
+      const usernameDiv = document.getElementById("usernameDiv");
+      const chatBox = document.getElementById("chat-box");
+      const btn = document.getElementById("submit");
+
+      const sidePanel = document.getElementById("side-panel");
+      const msgInput = document.getElementById("message");
+      const output = document.getElementById("output");
+      const msgBtn = document.getElementById("msg-btn");
+
+      //socket instance with autoconnect off
+      const socket = io({ autoConnect: false });
+
+      btn.addEventListener("click", (e) => {
+        const username =
+          e.target.previousSibling.previousSibling.previousSibling
+            .previousSibling.value;
+
+        //attach the username to the auth object on the socket
+        socket.auth = { username };
+
+        //initiate socket connection
+        socket.connect();
+
+        socket.on("connect", () => {
+          // remove usernameDiv and display chatbox div
+          usernameDiv.style.display = "none";
+          chatBox.style.display = "block";
+        });
+
+        socket.on("connect_error", (err) => {
+          console.log(err.message);
+        });
+      });
+
+      msgBtn.addEventListener("click", (e) => {
+        const message = msgInput.value;
+        socket.emit("message", message);
+      });
+
+      //listen for users emit
+      socket.on("users", (users) => {
+        const userList = document.createElement("ul");
+        users.forEach((user) => {
+          const listItem = document.createElement("li");
+          listItem.innerHTML = user.username;
+          userList.appendChild(listItem);
+        });
+        sidePanel.innerHTML = userList;
+      });
+
+      //listen for message emit
+      socket.on("message", (message) => {
+        const user = message.username;
+        const txtmsg = message.message;
+
+        //output the message
+        const para = document.createElement("p");
+        para.innerHTML = "<strong>" + user + "</strong> :" + txtmsg;
+        output.appendChild(para);
+      });
+    </script>
+  </body>
+</html>
