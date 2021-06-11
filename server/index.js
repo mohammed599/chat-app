@@ -19,11 +19,11 @@ app.get("/", (req, res) => {
 // })
 const httpServer = http.createServer(app);
 
-httpServer.listen(3000, (error) => {
+httpServer.listen(4000, (error) => {
   if (error) {
     console.log("something went wrong", error);
   } else {
-    console.log("listening on port 3000");
+    console.log("listening on port 4000");
   }
 });
 
@@ -33,7 +33,6 @@ const io = socket(httpServer);
 //keep track of all connected users
 
 io.on("connection", async (socket) => {
-  console.log("made socket connection");
   const users = [];
   //send all connected users on the client
 
@@ -43,7 +42,6 @@ io.on("connection", async (socket) => {
       username: socket.username,
     });
   }
-  console.log(users);
   io.sockets.emit("users", users);
 
   //listen for message emit

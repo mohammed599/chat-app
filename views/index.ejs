@@ -31,15 +31,18 @@
       #side-panel {
         float: left;
         width: 25%;
-        background-color: tomato;
+        color: white;
         margin: 0;
+        box-shadow: 5px 5px 5px grey;
+        height: 100vh;
       }
       #chat-panel {
         float: left;
         position: relative;
         text-align: center;
-        width: 65%;
+        width: 70%;
         height: 100%;
+        margin-left: 3%;
       }
       #chat-box {
         display: none;
@@ -47,15 +50,21 @@
         height: 100%;
       }
       #output {
-        height: 600px;
+        height: 70%;
+        border: 1px solid;
+        box-shadow: 3px 3px 3px grey;
+        overflow: auto;
       }
       #send-message {
         position: absolute;
-        bottom: 0;
+        bottom: 10%;
         width: 180px;
         left: 0;
         right: 0;
         margin: auto;
+      }
+      .output-div {
+        text-align: left;
       }
     </style>
   </head>
@@ -65,19 +74,26 @@
         type="textbox"
         placeholder="Enter a username"
         class="form-control"
-      /><br /><br />
+      /><br />
       <button id="submit" class="btn btn-primary">Submit</button>
     </div>
     <div id="chat-box">
-      <div id="side-panel">
+      <div id="side-panel" class="bg-primary">
         <h3>Active Users</h3>
         <ul id="active-users"></ul>
       </div>
       <div id="chat-panel">
         <div id="output"></div>
         <div id="send-message">
-          <input type="text" name="message" id="message" /><br /><br />
-          <button type="submit" id="msg-btn">Send Message</button>
+          <input
+            type="text"
+            name="message"
+            id="message"
+            class="form-control"
+          /><br />
+          <button type="submit" id="msg-btn" class="btn btn-primary">
+            Send Message
+          </button>
         </div>
       </div>
     </div>
@@ -98,8 +114,7 @@
 
       btn.addEventListener("click", (e) => {
         const username =
-          e.target.previousSibling.previousSibling.previousSibling
-            .previousSibling.value;
+          e.target.previousSibling.previousSibling.previousSibling.value;
 
         //attach the username to the auth object on the socket
         socket.auth = { username };
@@ -138,12 +153,40 @@
       //listen for message emit
       socket.on("message", (message) => {
         const user = message.username;
-        const txtmsg = message.message;
+        const txtMsg = message.message;
 
         //output the message
-        const para = document.createElement("p");
-        para.innerHTML = "<strong>" + user + "</strong> :" + txtmsg;
-        output.appendChild(para);
+        const outputDiv = document.createElement("div");
+        outputDiv.className = "card mb-2 bg-light output-div";
+        const cardBody = document.createElement("div");
+        cardBody.className = "card-body";
+        const cardTitle = document.createElement("h5");
+        cardTitle.className = "card-title";
+        cardTitle.innerHTML = user;
+        const cardSubtitle = document.createElement("h6");
+        cardSubtitle.className = "card-subtitle mb-2 text-muted";
+        cardSubtitle.innerHTML = new Date().toLocaleDateString();
+        const cardText = document.createElement("p");
+        cardText.className = "card-text";
+        cardText.innerHTML = txtMsg;
+        cardBody.appendChild(cardTitle);
+        cardBody.appendChild(cardSubtitle);
+        cardBody.appendChild(cardText);
+        outputDiv.appendChild(cardBody);
+        output.appendChild(outputDiv);
+
+        // const outputDiv = document.createElement("div");
+        // outputDiv.className = "output-div bg-light";
+        // const para = document.createElement("p");
+        // para.className = "output-para";
+        // para.innerHTML =
+        //   "<strong>" + user + "</strong> <br/> <i>" + txtmsg + "</i>";
+        // outputDiv.appendChild(para);
+        // const date = document.createElement("p");
+        // date.className = "timestamp";
+        // date.innerHTML = new Date().toLocaleDateString();
+        // outputDiv.appendChild(date);
+        // output.appendChild(outputDiv);
       });
     </script>
   </body>
